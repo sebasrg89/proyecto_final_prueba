@@ -18,7 +18,14 @@ pantalla = pg.display.set_mode((800,530))
 pantalla.fill(NEGRO)
 pg.display.set_caption("StarRun")
 
+velocidad = 10
+
 pantalla_ancho, pantalla_alto = pg.display.get_surface().get_size()
+
+from pygame import mixer
+mixer.init()
+mixer.music.load("songs/partida.wav")
+mixer.music.play()
 
 class Meteoritos(pg.sprite.Sprite):
     def __init__(self):
@@ -28,7 +35,7 @@ class Meteoritos(pg.sprite.Sprite):
         self.rect = self.surf.get_rect(center = (random.randint(40,500), (random.randint(-100,0))))
 
     def mover(self, score):
-        self.rect.move_ip(0,10)
+        self.rect.move_ip(0, velocidad)
         if (self.rect.bottom > 530):
             self.rect.center = (random.randint(30,460), (random.randint(-100,0)))
             score += 1
@@ -87,7 +94,8 @@ class Fondo_Pantalla():
 
 fondo_pantalla = Fondo_Pantalla()
 
-
+Incremento_Velocidad = pg.USEREVENT + 1
+pg.time.set_timer(Incremento_Velocidad, 3000)
 
 N1 = Nave()
 M1 = Meteoritos()
@@ -114,6 +122,9 @@ while True:
     for event in pg.event.get():
         if event.type == QUIT:
             pg.quit()
+        
+        if event.type == Incremento_Velocidad:
+            velocidad += 0.5
         
     if pg.sprite.spritecollide(N1, meteoritosGrupo, 0):
         pantalla.fill(NEGRO)
