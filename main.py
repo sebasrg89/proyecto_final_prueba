@@ -1,8 +1,8 @@
 import pygame as pg
 from pygame.locals import *
 import random
-import time
-import sys
+import time, sys
+
 
 pg.init()
 
@@ -13,12 +13,14 @@ NEGRO = (0,0,0)
 BLANCO = (255,255,255)
 VERDE = (0,128,94)
 ROJO = (255,0,0)
+NARANJA = (255,128,0)
+AMARILLO = (255,255,0)
 
 pantalla = pg.display.set_mode((800,530))
 pantalla.fill(NEGRO)
 pg.display.set_caption("StarRun")
 
-velocidad = 10
+velocidad = -5
 
 pantalla_ancho, pantalla_alto = pg.display.get_surface().get_size()
 
@@ -32,12 +34,13 @@ class Meteoritos(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.image.load("images/asteroide_mediano.png")
         self.surf = pg.Surface((40,40))
-        self.rect = self.surf.get_rect(center = (random.randint(40,500), (random.randint(-100,0))))
+        self.rect = self.surf.get_rect(center = (random.randint(-100,800), (random.randint(5,525))))
+       
 
     def mover(self, score):
-        self.rect.move_ip(0, velocidad)
-        if (self.rect.bottom > 530):
-            self.rect.center = (random.randint(30,460), (random.randint(-100,0)))
+        self.rect.move_ip(velocidad, 0)
+        if (self.rect.left <= 0):
+            self.rect.center = (random.randint(-100,800), (random.randint(5,525)))
             score += 1
         return score
 
@@ -49,7 +52,7 @@ class Nave(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.image.load("images/nave.png")
         self.surf = pg.Surface((50,80))
-        self.rect = self.surf.get_rect(center = (400,265))
+        self.rect = self.surf.get_rect(center = (25,265))
 
     def dibujar(self, surface):
         surface.blit(self.image, self.rect)
@@ -57,13 +60,13 @@ class Nave(pg.sprite.Sprite):
     def update(self):
         pressedKeys = pg.key.get_pressed()
 
-        if self.rect.left > 0:
-            if pressedKeys[K_LEFT]:
-                self.rect.move_ip(-5,0)
+        if self.rect.top < pantalla_alto:
+            if pressedKeys[K_UP]:
+                self.rect.move_ip(0,-5)
         
-        if self.rect.right < pantalla_ancho:
-            if pressedKeys[K_RIGHT]:
-                self.rect.move_ip(5,0)
+        if self.rect.bottom < pantalla_alto:
+            if pressedKeys[K_DOWN]:
+                self.rect.move_ip(0,5)
 
 class Fondo_Pantalla():
     def __init__(self):
@@ -73,21 +76,21 @@ class Fondo_Pantalla():
         self.fpY1 = 0
         self.fpX1 = 0
 
-        self.fpY2 = -self.rectFPimage.height
-        self.fpX2 = 0
-        
+        self.fpY2 = 0
+        self.fpX2 = +self.rectFPimage.width
+    '''    
         self.moveSpeed = 5
 
     def update(self):
-        self.fpY1 += self.moveSpeed
-        self.fpY2 += self.moveSpeed
+        self.fpX1 -= self.moveSpeed
+        self.fpX2 -= self.moveSpeed
 
-        if self.fpY1>self.rectFPimage.height:
-            self.fpY1 = -self.rectFPimage.height
+        if self.fpX1>self.rectFPimage.width:
+            self.fpX1 = -self.rectFPimage.width
 
-        if self.fpY2>self.rectFPimage.height:
-            self.fpY2 = -self.rectFPimage.height
-    
+        if self.fpX2>self.rectFPimage.width:
+            self.fpX2 = -self.rectFPimage.width
+    '''
     def render(self):
         pantalla.blit(self.fondoPartida,(self.fpX1,self.fpY1))
         pantalla.blit(self.fondoPartida,(self.fpX2,self.fpY2))
@@ -109,22 +112,25 @@ meteoritosGrupo.add(M2)
 meteoritosGrupo.add(M3)
 
 
-fuente = pg.font.SysFont("Verdana", 60)
+fuente = pg.font.SysFont("Verdana", 30)
 gameOver = fuente.render("Game Over", True, BLANCO)
 
 score = 0
+jugador = [1,2,3,4]
 
 while True:
     scoreRender = fuente.render("Score: " +str(score), True, ROJO)
-    fondo_pantalla.update()
+    jugadorRender = fuente.render("Jugador: 1", 0, AMARILLO)
+    #fondo_pantalla.update()
     fondo_pantalla.render()
     pantalla.blit(scoreRender, (0,0))
+    pantalla.blit(jugadorRender, (0,30))
     for event in pg.event.get():
         if event.type == QUIT:
             pg.quit()
         
         if event.type == Incremento_Velocidad:
-            velocidad += 0.5
+            velocidad -= 0.5
         
     if pg.sprite.spritecollide(N1, meteoritosGrupo, 0):
         pantalla.fill(NEGRO)
